@@ -19,7 +19,8 @@ async function get(url) {
 const issues = parseArchive(await get(ARCHIVE)).slice(0, ISSUES);
 if (!issues.length) throw new Error("Keine Ausgaben im Archiv gefunden – Layout geändert?");
 
-let list = existsSync(FILE) ? JSON.parse(readFileSync(FILE, "utf8")) : [];
+const before = existsSync(FILE) ? readFileSync(FILE, "utf8") : "[]";
+let list = JSON.parse(before);
 console.log(`${list.length} Quotes in quotes.json, prüfe ${issues.length} Ausgabe(n)`);
 
 let added = 0, emptyIssues = 0;
@@ -32,8 +33,12 @@ for (const url of issues) {
   added += r.added.length;
 }
 
-if (added && !DRY) writeFileSync(FILE, JSON.stringify(list, null, 2) + "\n");
-console.log(`Fertig: ${added} neue Quote(s)${DRY ? " (Dry Run)" : ""}, gesamt ${list.length}`);
+// merge only runs when an issue yields quotes; make sure tags exist on every entry anyway
+list = mergeQuotes(list, [], { date: today }).list;
+const after = JSON.stringify(list, null, 2) + "\n";
+const changed = after !== before;
+if (changed && !DRY) writeFileSync(FILE, after);
+console.log(`Fertig: ${added} neue Quote(s)${changed ? "" : ", keine Änderung"}${DRY ? " (Dry Run)" : ""}, gesamt ${list.length}`);
 
 // Fail loudly if the parser stopped finding anything (layout change)
 if (emptyIssues === issues.length) {

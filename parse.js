@@ -3,6 +3,7 @@ import * as cheerio from "cheerio";
 const QUOTE_START = /^["“”'‘*_\s]*["“]/;
 const DASH = /^[—–-]\s*/;
 const own = "Farnam Street";
+const MAX_LEN = 4000; // sanity cap against a runaway block, not a style limit
 const JUNK = /thanks for reading|p\.s\.|\bshare this\b|click here|subscribe|newsletter|podcast|webinar|register|sign up|read more|learn more/i;
 
 const clean = (s) =>
@@ -120,13 +121,12 @@ export function parseIssue(html) {
   for (const s of sections) {
     if (s.name.includes("tiny thought")) {
       for (const b of s.blocks) {
-        let q = tidy(b.join(" "));
-        if (q.length > 400 && b.length > 1) q = tidy(b[0]); // long essay-style item: keep its headline
-        if (JUNK.test(q)) continue;
+        // multi-paragraph items stay complete (tagged "long" later); only footer/promo paragraphs are dropped
+        let q = tidy(b.filter((t) => !JUNK.test(t)).join(" "));
         let author = own;
         const g = q.match(/^(.{20,}?)([”"])?\s*[—–]\s*([^—–]{3,40})$/);
         if (g) { const n = cleanAuthor(g[3]); if (n && (n.includes(" ") || g[2])) { q = tidy(g[1]); author = n; } }
-        if (q.length >= 10 && q.length <= 400 && !/[,:]$/.test(q)) out.push({ quote: q, author });
+        if (q.length >= 10 && q.length <= MAX_LEN && !/[,:]$/.test(q)) out.push({ quote: q, author });
       }
     } else if (s.name === "fs" || s.name.includes("insight")) {
       for (const b of s.blocks) {

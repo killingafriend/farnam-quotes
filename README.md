@@ -4,8 +4,12 @@ Sammlung von Quotes aus den Brain-Food-Ausgaben von fs.blog (**Tiny Thoughts** u
 **Insights**) als einzelne Datei: [`quotes.json`](quotes.json).
 
 ```json
-{ "id": "5c84dba8b769", "quote": "…", "author": "Sam Altman", "source": "https://fs.blog/brain-food/…/" | null, "added": "2026-11-04" }
+{ "id": "5c84dba8b769", "quote": "…", "author": "Sam Altman", "source": "https://fs.blog/brain-food/…/" | null, "added": "2026-11-04", "tags": [] }
 ```
+
+`tags`: Quotes mit mehr als 400 Zeichen (mehrteilige Tiny Thoughts) werden nie gekürzt, sondern
+bekommen den Tag `"long"`. Apps können diese Quotes damit per Einstellung ein- oder ausblenden
+(Schwelle: `LONG_MIN` in `merge.js`; Tags werden bei jedem Sync neu berechnet).
 
 ## Automatik
 

@@ -102,6 +102,15 @@ assert.ok(by("Extraordinary results"));
 assert.ok(!d.some((q) => /Thanks for reading/.test(q.quote)), "Newsletter-Footer ignoriert");
 assert.equal(d.length, 6);
 
+// Lange Tiny Thoughts (mehrere Absätze) werden nicht gekürzt
+const longPara = "This is a longer paragraph that keeps going with more and more words so the total is long. ".repeat(3);
+const longIssue = `<div class="entry-content"><h2>Tiny Thoughts</h2><p><strong>1.</strong></p>
+<p>${longPara}</p><p>${longPara}</p><p>Final sentence of the long item.</p>
+<p>Subscribe to our newsletter for more.</p></div>`;
+const e = parseIssue(longIssue);
+assert.equal(e.length, 1);
+assert.ok(e[0].quote.length > 400 && e[0].quote.endsWith("Final sentence of the long item."), "nicht gekürzt, Promo-Absatz entfernt");
+
 const arch = parseArchive(`<a href="https://fs.blog/brain-food/november-1-2026/">x</a>
 <a href="https://fs.blog/brain-food/">archive</a>
 <a href="http://fs.blog/brain-food/december-17-2023">y</a>
