@@ -67,6 +67,41 @@ assert.equal(c.length, 3);
 assert.equal(c[2].author, "Michael Jordan");
 assert.ok(!c.some((q) => q.quote.includes("Kotler")));
 
+// Pullquotes, nummerierte Items, Autor im selben Absatz, Titel vor dem Namen
+const modern = `<div class="entry-content">
+<h2>FS</h2><p>Pressure is a privilege when decisions matter to other people.</p><hr/>
+<h2>Insights</h2>
+<p>1.</p>
+<figure class="wp-block-pullquote"><blockquote><p>\u201cWrong decisions are part of life. Being able to make them work anyway is one of the abilities of those who are successful.\u201d</p><cite>\u2014 Warren Buffett</cite></blockquote></figure>
+<p>2.</p>
+<p>Investor and mathematician Jim Simons on beauty:</p>
+<p><em>\u201cBe guided by beauty. I really mean that.\u201d</em></p>
+<hr/>
+<p>\u201cA good photograph is knowing where to stand.\u201d\u2014 Ansel Adams</p>
+<hr/>
+<p>Actress Lucille Ball on the myth of overnight success:</p>
+<p>\u201cRemember that there are practically no overnight successes, ever.\u201d (Click here to share on Twitter)</p>
+<h2>Tiny Thoughts</h2>
+<p><strong>1.</strong></p>
+<p>If you don\u2019t value your time, don\u2019t expect other people to respect it.</p>
+<p>Consider pointless meetings. The more you attend, the more you get invited to.</p>
+<p><strong>2.</strong></p>
+<p>Extraordinary results come from doing ordinary things exceptionally well for a long time.</p>
+<p><strong>3.</strong></p>
+<p>Thanks for reading, \u2014 Shane P.S. Join our event next week.</p>
+</div>`;
+const d = parseIssue(modern);
+const by = (frag) => d.find((q) => q.quote.includes(frag));
+assert.equal(by("Wrong decisions").author, "Warren Buffett");
+assert.equal(by("Be guided by beauty").author, "Jim Simons");
+assert.deepEqual(by("good photograph"), { quote: "A good photograph is knowing where to stand.", author: "Ansel Adams" });
+assert.equal(by("overnight successes").author, "Lucille Ball");
+assert.ok(!by("overnight successes").quote.includes("Click"));
+assert.equal(by("don\u2019t value your time").author, "Farnam Street");
+assert.ok(by("Extraordinary results"));
+assert.ok(!d.some((q) => /Thanks for reading/.test(q.quote)), "Newsletter-Footer ignoriert");
+assert.equal(d.length, 6);
+
 const arch = parseArchive(`<a href="https://fs.blog/brain-food/november-1-2026/">x</a>
 <a href="https://fs.blog/brain-food/">archive</a>
 <a href="http://fs.blog/brain-food/december-17-2023">y</a>
