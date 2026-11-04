@@ -1,4 +1,5 @@
 name: Farnam Quotes Sync
+# Sync-Job: holt neue Quotes aus Brain Food und committet quotes.json
 
 on:
   schedule:
