@@ -1,0 +1,43 @@
+name: Farnam Quotes Sync
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"   # jeden Montag 07:00 UTC (Brain Food kommt sonntags)
+  workflow_dispatch:
+    inputs:
+      issues:
+        description: "Wie viele der neuesten Ausgaben prüfen (Backfill)"
+        default: "3"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run sync
+        env:
+          ISSUES: ${{ github.event.inputs.issues || '3' }}
+      - name: Commit quotes.json
+        run: |
+          if git diff --quiet -- quotes.json; then
+            echo "Keine neuen Quotes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add quotes.json
+          git commit -m "chore: neue Quotes ($(date -u +%F))"
+          git push

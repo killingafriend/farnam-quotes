@@ -1,0 +1,14 @@
+{
+  "name": "farnam-quotes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "node sync.js",
+    "dry": "DRY_RUN=1 node sync.js",
+    "test": "node test/parse.test.js && node test/merge.test.js"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0"
+  }
+}
